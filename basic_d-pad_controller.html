@@ -1,0 +1,263 @@
+<html><head>
+    <title>Controller</title>
+    <meta name="viewport" content="width=device-width, user-scalable=no">
+    
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            background-color: #222;
+            color: #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        
+* {
+                -webkit-user-select: none; /* Safari */
+                -moz-user-select: none;    /* Firefox */
+                -ms-user-select: none;     /* Internet Explorer/Edge */
+                user-select: none;         /* Standard */
+        }
+        
+
+
+        .container {
+            display: absolute;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            height: 620px;
+            width: 300px;
+        }
+
+        .buttons {
+            position: absolute;
+            top: 5%; /* Places the buttons above the dpad (adjust as needed) */
+            left: 50%;
+            transform: translate(-50%, 0); /* Centers the buttons horizontally */
+            width: 300px;
+            display: flex;
+            justify-content: space-between; /* Adjust alignment of buttons */
+            gap: 20px;
+            border-radius: 10px;
+        }
+
+        .dpad {
+            position: absolute;
+            top: 70%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 300px;
+            height: 300px;
+        }
+
+
+        #up, #down, #left, #right{
+            position: absolute;
+            width: 100px;
+            height: 100px;
+            border: none;
+            border-radius: 10px;
+            font-size: 32px;
+            cursor: pointer;
+            color: #fff;
+        }
+
+        #up {
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #9b59b6;
+        }
+
+        #down {
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #34495e;
+        }
+
+        #left {
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            background-color: #f1c40f;
+        }
+
+        #right {
+            right: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            background-color: #2ecc71;
+        }
+        
+
+
+
+        #middle {
+            position: absolute;
+            width: 150px;
+            height: 70px;
+            border: none;
+            border-radius: 10px;
+            font-size: 32px;
+            cursor: pointer;
+            color: #fff;
+            top: 70;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #9b59b6;
+        }
+
+
+
+
+        
+        #player_name {
+            position: absolute;
+            width: 300px;
+            height: 50px;
+            border: none;
+            border-radius: 10px;
+            font-size: 32px;
+            cursor: pointer;
+            color: #000;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            text-align: center;
+            justify-content: center;
+        }
+        
+        #select, #back {
+            width: 100px;
+            height: 100px;
+            font-size: 32px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            color: #fff;
+        }
+        #select {
+            background-color: #3498db;
+        }
+
+        #back {
+            background-color: #e74c3c;
+        }
+        
+        #start {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            width: 120px;
+            height: 100px;
+            font-size: 18px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            background-color: #4560ff;
+            color: #fff;
+        }
+        
+        #disconnect {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            width: 120px;
+            height: 100px;
+            font-size: 18px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            background-color: #e74c3c;
+            color: #fff;
+        }
+        
+        button:hover {
+            opacity: 0.8;
+        }
+
+    </style>
+
+    <script>
+    function isIOS() {
+return /iPhone|iPad|iPod/i.test(navigator.userAgent);
+}
+
+function playBeep() {
+const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+const oscillator = audioContext.createOscillator();
+const gainNode = audioContext.createGain();
+
+// Configure the oscillator
+oscillator.type = "sine"; // Sine wave
+var frequency = 440 + (Math.random() * 20 - 10); // ±10 Hz from 440 Hz
+oscillator.connect(gainNode);
+
+// Configure the gain (volume)
+gainNode.gain.setValueAtTime(0.5, audioContext.currentTime); // Volume
+gainNode.connect(audioContext.destination);
+
+// Play for 200 ms
+oscillator.start();
+oscillator.stop(audioContext.currentTime + 0.2);
+}
+
+        function sendAction(action) {
+            if (!isIOS() && navigator.vibrate) {
+    // Vibrate for 500ms if the device supports it
+    navigator.vibrate(500);
+} else if (isIOS()) {
+    // Play a sine wave beep as a fallback for iOS
+    playBeep();
+}
+            var xhr = new XMLHttpRequest();
+            xhr.open("POST", "/", true);
+            xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+            xhr.send("action=" + action + "&client=8f4c4f04b26b82bb28b7583e95a6d724");
+            
+        }
+        
+document.addEventListener('dblclick', function(e) {
+            e.preventDefault();
+        });
+        
+        document.addEventListener("selectionchange", () => {
+            if (window.getSelection) {
+                window.getSelection().removeAllRanges();
+            }
+        });
+
+        document.addEventListener("contextmenu", (event) => {
+            event.preventDefault();
+        });
+    
+
+    </script>
+</head>
+<body>
+
+    <div class="container">
+        <div class="buttons">
+            <button id="start" onclick="sendAction('start')">Start</button>
+            <form method="POST">
+                <button id="disconnect" name="action" value="disconnect">Disconnect</button>
+                <input type="hidden" name="client" value="8f4c4f04b26b82bb28b7583e95a6d724">
+            </form>	
+        </div>
+        <div class="dpad">	
+            <button id="up" onclick="sendAction('up')"></button>
+            <button id="down" onclick="sendAction('down')"></button>
+            <button id="left" onclick="sendAction('left')"></button>
+            <button id="right" onclick="sendAction('right')"></button>
+            
+        </div>
+
+    </div>
+
+
+</body></html>
