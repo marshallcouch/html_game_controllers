@@ -63,6 +63,9 @@
             overflow: hidden;
             font-size: 3vw;
         }
+        button:active {
+            filter: brightness(0.7); /* Darken by 20% */
+        }
         .a {
             position: absolute;
             right: 30%; /* Move right by another 50px */
@@ -124,17 +127,53 @@
         <div class="thumbstick right-thumbstick" id="right-thumbstick">
             <div class="thumbstick-inner" id="right-thumbstick-inner"></div>
         </div>
-        <button class="a">A</button>      
-        <button class="b">B</button>
-        <button class="start-button">Start</button>
-        <button class="disconnect-button">Disconnect</button>
+        <button class="a" onclick="sendAction('A_BUTTON')">A</button>      
+        <button class="b" onclick="sendAction('B_BUTTON')">B</button>
+        <button class="start-button" onclick="sendAction('START_BUTTON')">Start</button>
+        <button class="disconnect-button" onclick="sendAction('DISCONNECT_BUTTON')">Disconnect</button>
     </div>
     <script>
+        const DIRECTIONS = {
+            CENTER: "CENTER",
+            UP: "UP",
+            UP_RIGHT: "UP-RIGHT",
+            RIGHT: "RIGHT",
+            DOWN_RIGHT: "DOWN-RIGHT",
+            DOWN: "DOWN",
+            DOWN_LEFT: "DOWN-LEFT",
+            LEFT: "LEFT",
+            UP_LEFT: "UP-LEFT"
+        };
+
         const createThumbstick = (thumbstickId, thumbstickInnerId) => {
             const thumbstick = document.getElementById(thumbstickId);
             const thumbstickInner = document.getElementById(thumbstickInnerId);
             let activeTouchId = null;
             let startX, startY;
+            let currentDirection = DIRECTIONS.CENTER;
+
+            function getDirection(x, y) {
+                const distance = Math.sqrt(x * x + y * y);
+                const threshold = 0.5; // Adjust this value to change sensitivity
+
+                if (distance < threshold) {
+                    return DIRECTIONS.CENTER;
+                }
+
+                // Calculate angle in degrees (0-360)
+                let angle = Math.atan2(y, x) * 180 / Math.PI;
+                if (angle < 0) angle += 360;
+
+                // Convert angle to 8-way direction
+                if (angle >= 337.5 || angle < 22.5) return DIRECTIONS.RIGHT;
+                if (angle >= 22.5 && angle < 67.5) return DIRECTIONS.DOWN_RIGHT;
+                if (angle >= 67.5 && angle < 112.5) return DIRECTIONS.DOWN;
+                if (angle >= 112.5 && angle < 157.5) return DIRECTIONS.DOWN_LEFT;
+                if (angle >= 157.5 && angle < 202.5) return DIRECTIONS.LEFT;
+                if (angle >= 202.5 && angle < 247.5) return DIRECTIONS.UP_LEFT;
+                if (angle >= 247.5 && angle < 292.5) return DIRECTIONS.UP;
+                return DIRECTIONS.UP_RIGHT;
+            }
 
             const start = (x, y, id) => {
                 activeTouchId = id;
@@ -142,27 +181,40 @@
                 startY = y;
             };
 
-        const move = (x, y) => {
-            if (activeTouchId === null) return;
-            const deltaX = x - startX;
-            const deltaY = y - startY;
+            const move = (x, y) => {
+                if (activeTouchId === null) return;
+                const deltaX = x - startX;
+                const deltaY = y - startY;
 
-            // Calculate the max distance as a fraction of the viewport width (e.g., 5% of the viewport width)
-            const maxDistance = window.innerWidth * 0.05; // Adjust 0.05 (5%) to your preference
-            const distance = Math.min(Math.sqrt(deltaX * deltaX + deltaY * deltaY), maxDistance);
+                const maxDistance = window.innerWidth * 0.05;
+                const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+                const normalizedDistance = Math.min(distance, maxDistance);
 
-            const angle = Math.atan2(deltaY, deltaX);
-            const moveX = distance * Math.cos(angle);
-            const moveY = distance * Math.sin(angle);
+                const angle = Math.atan2(deltaY, deltaX);
+                const moveX = normalizedDistance * Math.cos(angle);
+                const moveY = normalizedDistance * Math.sin(angle);
 
-            thumbstickInner.style.transform = `translate(calc(-50% + ${moveX}px), calc(-50% + ${moveY}px))`;
-        };
+                // Calculate normalized values for direction detection
+                const normalizedX = deltaX / maxDistance;
+                const normalizedY = deltaY / maxDistance; // Removed the negative sign here
 
+                const newDirection = getDirection(normalizedX, normalizedY);
+                if (newDirection !== currentDirection) {
+                    console.log(`${thumbstickId}: ${newDirection}`);
+                    currentDirection = newDirection;
+                    sendAction(`${thumbstickId}_${newDirection}`);
+                }
+
+                thumbstickInner.style.transform = `translate(calc(-50% + ${moveX}px), calc(-50% + ${moveY}px))`;
+            };
 
             const end = (id) => {
                 if (activeTouchId !== id) return;
                 activeTouchId = null;
+                currentDirection = DIRECTIONS.CENTER;
                 thumbstickInner.style.transform = 'translate(-50%, -50%)';
+                console.log(`${thumbstickId}: ${DIRECTIONS.CENTER}`);
+                sendAction(`${thumbstickId}_${DIRECTIONS.CENTER}`);
             };
 
             thumbstick.addEventListener('touchstart', (e) => {
@@ -204,6 +256,60 @@
 
         createThumbstick('left-thumbstick', 'left-thumbstick-inner');
         createThumbstick('right-thumbstick', 'right-thumbstick-inner');
+
+        function isIOS() {
+        return /iPhone|iPad|iPod/i.test(navigator.userAgent);
+        }
+
+        function playBeep() {
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        const oscillator = audioContext.createOscillator();
+        const gainNode = audioContext.createGain();
+
+        // Configure the oscillator
+        oscillator.type = "sine"; // Sine wave
+        var frequency = 440 + (Math.random() * 20 - 10); // ±10 Hz from 440 Hz
+        oscillator.connect(gainNode);
+
+        // Configure the gain (volume)
+        gainNode.gain.setValueAtTime(0.5, audioContext.currentTime); // Volume
+        gainNode.connect(audioContext.destination);
+
+        // Play for 200 ms
+        oscillator.start();
+        oscillator.stop(audioContext.currentTime + 0.2);
+        }
+
+        function sendAction(action) {
+            if (!isIOS() && navigator.vibrate) {
+
+            // Vibrate for 200ms if the device supports it
+            navigator.vibrate(200);
+            } else if (isIOS()) {
+                // Play a sine wave beep as a fallback for iOS
+                playBeep();
+            }
+            var xhr = new XMLHttpRequest();
+            xhr.open("POST", "/", true);
+            xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+            xhr.send("action=" + action + "&client=8f4c4f04b26b82bb28b7583e95a6d724");
+            console.log(action)
+                
+        }
+        
+        document.addEventListener('dblclick', function(e) {
+            e.preventDefault();
+        });
+        
+        document.addEventListener("selectionchange", () => {
+            if (window.getSelection) {
+                window.getSelection().removeAllRanges();
+            }
+        });
+
+        document.addEventListener("contextmenu", (event) => {
+            event.preventDefault();
+        });
     </script>
 </body>
 </html>
