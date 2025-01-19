@@ -117,10 +117,20 @@
             color: #fff;
 
         }
+        #player_number {
+            position: absolute;
+            top: 5%;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 3vw;
+            color: #fff;
+            text-align: center;
+        }
     </style>
 </head>
 <body>
     <div class="container">
+        <div id="player_number">PLAYER_NUMBER</div>
          <div class="thumbstick left-thumbstick" id="left-thumbstick">
             <div class="thumbstick-inner" id="left-thumbstick-inner"></div>
         </div>
@@ -155,7 +165,7 @@
             function getDirection(x, y) {
                 const distance = Math.sqrt(x * x + y * y);
                 const threshold = 0.5; // Adjust this value to change sensitivity
-
+ 
                 if (distance < threshold) {
                     return DIRECTIONS.CENTER;
                 }
