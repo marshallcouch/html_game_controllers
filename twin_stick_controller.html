@@ -1,374 +1,345 @@
 <html>
 
 <head>
+    <link rel="icon" type="image/png" href="/favicon.png">
     <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
-    <title>Sunset Controller</title>
-    <script>
-        document.addEventListener('dblclick', function (e) {
-            e.preventDefault();
-        });
+    <title>Twin Stick Controller</title>
+   <script>
+document.addEventListener('dblclick', function(e) {
+           e.preventDefault();
+       });
+       
+       document.addEventListener("selectionchange", () => {
+           if (window.getSelection) {
+               window.getSelection().removeAllRanges();
+           }
+       });
 
-        document.addEventListener("selectionchange", () => {
-            if (window.getSelection) {
-                window.getSelection().removeAllRanges();
-            }
-        });
+       document.addEventListener("contextmenu", (event) => {
+           event.preventDefault();
+       });
+       
+</script>
+   <style>
+   * {
+               -webkit-user-select: none; /* Safari */
+               -moz-user-select: none;    /* Firefox */
+               -ms-user-select: none;     /* Internet Explorer/Edge */
+               user-select: none;         /* Standard */
+       }
 
-        document.addEventListener("contextmenu", (event) => {
-            event.preventDefault();
-        });
-    </script>
-    <style>
-        * {
-            -webkit-user-select: none;
-            /* Safari */
-            -moz-user-select: none;
-            /* Firefox */
-            -ms-user-select: none;
-            /* Internet Explorer/Edge */
-            user-select: none;
-            /* Standard */
-        }
+html {
+   overflow: hidden; /* Prevent scrolling */
+   width: 100%;    /* Ensure no overflow due to content */
+}
+  body {
+       font-family: Arial, sans-serif;
+       margin: 0;
+       background-color: #222;
+       color: #fff;
+       display: flex;
+       justify-content: center;
+       align-items: center;
+       height: 100vh;
+       overflow: hidden; /* Prevent scrolling */
+   }
+   .container {
+       display: flex;
+       flex-direction: column;
+       align-items: center;
+       justify-content: center;
+       position: relative;
+       min-width: 32px;
+       min-height: 18px;
+       height: auto;
+       width: 100%;
+       transform-origin: top left;
+       aspect-ratio: 18 / 9;
+   }
+   .thumbstick {
+       position: absolute;
+       width: 18.75%;
+       height: 35%;
+       background-color: #444;
+       border-radius: 50%;
+       touch-action: none;
+   }
+   .thumbstick-inner {
+       position: absolute;
+       top: 50%;
+       left: 50%;
+       transform: translate(-50%, -50%);
+       width: 70%;
+       height: 70%;
+       background-color: #888;
+       border-radius: 50%;
+   }
+   .left-thumbstick {
+       left: 20%;
+       top: 60%;
+       transform: translate(-50%, -50%);
+   }
+   .right-thumbstick {
+       right: 20%;
+       top: 60%;
+       transform: translate(50%, -50%);
+   }
+   button {
+       white-space: nowrap;
+       text-overflow: ellipsis;
+       overflow: hidden;
+       font-size: 3vw;
+   }
+   button:active {
+       filter: brightness(0.7); /* Darken by 20% */
+   }
+   .a {
+       position: absolute;
+       right: 30%; /* Move right by another 50px */
+       top: 25%;
+       transform: translate(50%, -50%);
+       width: 14%;
+       height: 26.6%;
+       background-color: #55F;
+       border: none;
+       border-radius: 50%;
+       color: #fff;
+   }
+   .b {
+       position: absolute;
+       right: 10%; /* Move right by another 50px */
+       top: 25%;
+       transform: translate(50%, -50%);
+       width: 14%;
+       height: 26.6%;
+       background-color: #F55;
+       border: none;
+       border-radius: 50%;
+       color: #fff;
+   }
+   .start-button {
+       position: absolute;
+       top: 40%;
+       left: 50%;
+       width: 20%;
+       height: 15%;
+       background-color: #555;
+       border: none;
+       border-radius: 10px;
+       color: #fff;
+       justify-content: center;
+       align-items: center;
+       transform: translateX(-50%);
 
-        html {
-            overflow: hidden;
-            /* Prevent scrolling */
-            width: 100%;
-            /* Ensure no overflow due to content */
-        }
+   }
+   .disconnect-button {
+       position: absolute;
+       top: 10%;
+       left: 5%;
+       width: 20%;
+       height: 15%;
+       background-color: #555;
+       border: none;
+       border-radius: 10px;
+       color: #fff;
 
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            background-color: #222;
-            color: #fff;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            overflow: hidden;
-            /* Prevent scrolling */
-        }
+   }
+   #player_number {
+       position: absolute;
+       top: 15%;
+       left: 50%;
+       transform: translateX(-50%);
+       font-size: 3vw;
+       color: #fff;
+       text-align: center;
+   }
 
-        .container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-            min-width: 32px;
-            min-height: 18px;
-            height: auto;
-            width: 100%;
-            transform-origin: top left;
-            aspect-ratio: 18 / 9;
-        }
+</style>
 
-        .thumbstick {
-            position: absolute;
-            width: 18.75%;
-            height: 35%;
-            background-color: #444;
-            border-radius: 50%;
-            touch-action: none;
-        }
+</head><body>
+   
+<div class="container">
+   <div id="player_number">PLAYER_NUMBER</div>
+    <div class="thumbstick left-thumbstick" id="left-thumbstick">
+       <div class="thumbstick-inner" id="left-thumbstick-inner"></div>
+   </div>
+   <div class="thumbstick right-thumbstick" id="right-thumbstick">
+       <div class="thumbstick-inner" id="right-thumbstick-inner"></div>
+   </div>
+   <button class="a" onclick="sendAction('A_BUTTON')">A</button>      
+   <button class="b" onclick="sendAction('B_BUTTON')">B</button>
+   <button class="start-button" onclick="sendAction('START_BUTTON')">Start</button>
+   
+</div>
 
-        .thumbstick-inner {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 70%;
-            height: 70%;
-            background-color: #888;
-            border-radius: 50%;
-        }
+   <script>
+function goFullscreen() {
+if (document.documentElement.requestFullscreen) {
+   document.documentElement.requestFullscreen();
+} else if (document.documentElement.webkitRequestFullscreen) { // Safari support
+   document.documentElement.webkitRequestFullscreen();
+} else if (document.documentElement.msRequestFullscreen) { // IE/Edge support
+   document.documentElement.msRequestFullscreen();
+}
+}
+       
+const DIRECTIONS = {
+       CENTER: "-CENTER",
+       UP: "DUP",
+       UP_RIGHT: "DUP-DRIGHT",
+       RIGHT: "DRIGHT",
+       DOWN_RIGHT: "DDOWN-DRIGHT",
+       DOWN: "DDOWN",
+       DOWN_LEFT: "DDOWN-DLEFT",
+       LEFT: "DLEFT",
+       UP_LEFT: "DUP-DLEFT"
+   };
 
-        .left-thumbstick {
-            left: 25%;
-            top: 65%;
-            transform: translate(-50%, -50%);
-        }
+   const createThumbstick = (thumbstickId, thumbstickInnerId) => {
+       const thumbstick = document.getElementById(thumbstickId);
+       const thumbstickInner = document.getElementById(thumbstickInnerId);
+       let activeTouchId = null;
+       let startX, startY;
+       let currentDirection = DIRECTIONS.CENTER;
 
-        .right-thumbstick {
-            right: 25%;
-            top: 65%;
-            transform: translate(50%, -50%);
-        }
+       function getDirection(x, y) {
+           const distance = Math.sqrt(x * x + y * y);
+           const threshold = 0.5; // Adjust this value to change sensitivity
 
-        button {
-            white-space: nowrap;
-            text-overflow: ellipsis;
-            overflow: hidden;
-            font-size: 3vw;
-        }
+           if (distance < threshold) {
+               return DIRECTIONS.CENTER;
+           }
 
-        button:active {
-            filter: brightness(0.7);
-            /* Darken by 20% */
-        }
+           // Calculate angle in degrees (0-360)
+           let angle = Math.atan2(y, x) * 180 / Math.PI;
+           if (angle < 0) angle += 360;
 
-        .a {
-            position: absolute;
-            right: 30%;
-            /* Move right by another 50px */
-            top: 30%;
-            transform: translate(50%, -50%);
-            width: 14%;
-            height: 26.6%;
-            background-color: #55F;
-            border: none;
-            border-radius: 50%;
-            color: #fff;
-        }
+           // Convert angle to 8-way direction
+           if (angle >= 337.5 || angle < 22.5) return DIRECTIONS.RIGHT;
+           if (angle >= 22.5 && angle < 67.5) return DIRECTIONS.DOWN_RIGHT;
+           if (angle >= 67.5 && angle < 112.5) return DIRECTIONS.DOWN;
+           if (angle >= 112.5 && angle < 157.5) return DIRECTIONS.DOWN_LEFT;
+           if (angle >= 157.5 && angle < 202.5) return DIRECTIONS.LEFT;
+           if (angle >= 202.5 && angle < 247.5) return DIRECTIONS.UP_LEFT;
+           if (angle >= 247.5 && angle < 292.5) return DIRECTIONS.UP;
+           return DIRECTIONS.UP_RIGHT;
+       }
 
-        .b {
-            position: absolute;
-            right: 10%;
-            /* Move right by another 50px */
-            top: 25%;
-            transform: translate(50%, -50%);
-            width: 14%;
-            height: 26.6%;
-            background-color: #F55;
-            border: none;
-            border-radius: 50%;
-            color: #fff;
-        }
+       const start = (x, y, id) => {
+           activeTouchId = id;
+           startX = x;
+           startY = y;
+       };
 
-        .start-button {
-            position: absolute;
-            top: 40%;
-            left: 50%;
-            width: 20%;
-            height: 15%;
-            background-color: #555;
-            border: none;
-            border-radius: 10px;
-            color: #fff;
-            justify-content: center;
-            align-items: center;
-            transform: translateX(-50%);
+       const move = (x, y) => {
+           if (activeTouchId === null) return;
+           const deltaX = x - startX;
+           const deltaY = y - startY;
 
-        }
+           const maxDistance = window.innerWidth * 0.05;
+           const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+           const normalizedDistance = Math.min(distance, maxDistance);
 
-        .disconnect-button {
-            position: absolute;
-            top: 10%;
-            left: 5%;
-            width: 20%;
-            height: 15%;
-            background-color: #555;
-            border: none;
-            border-radius: 10px;
-            color: #fff;
+           const angle = Math.atan2(deltaY, deltaX);
+           const moveX = normalizedDistance * Math.cos(angle);
+           const moveY = normalizedDistance * Math.sin(angle);
 
-        }
+           // Calculate normalized values for direction detection
+           const normalizedX = deltaX / maxDistance;
+           const normalizedY = deltaY / maxDistance; // Removed the negative sign here
 
-        #player_number {
-            position: absolute;
-            top: 15%;
-            left: 50%;
-            transform: translateX(-50%);
-            font-size: 3vw;
-            color: #fff;
-            text-align: center;
-        }
-    </style>
+           const newDirection = getDirection(normalizedX, normalizedY);
+           if (newDirection !== currentDirection) {
+               currentDirection = newDirection;
+               sendAction(`${thumbstickId}_${newDirection}`);
+           }
 
-</head>
+           thumbstickInner.style.transform = `translate(calc(-50% + ${moveX}px), calc(-50% + ${moveY}px))`;
+       };
 
-<body>
+       const end = (id) => {
+           if (activeTouchId !== id) return;
+           activeTouchId = null;
+           currentDirection = DIRECTIONS.CENTER;
+           thumbstickInner.style.transform = 'translate(-50%, -50%)';
+           sendAction(`${thumbstickId}_${DIRECTIONS.CENTER}`);
+       };
 
-    <div class="container">
-        <div id="player_number">Player 1</div>
-        <div class="thumbstick left-thumbstick" id="left-thumbstick">
-            <div class="thumbstick-inner" id="left-thumbstick-inner"></div>
-        </div>
-        <div class="thumbstick right-thumbstick" id="right-thumbstick">
-            <div class="thumbstick-inner" id="right-thumbstick-inner"></div>
-        </div>
-        <button class="a" onclick="sendAction('A_BUTTON')">A</button>
-        <button class="b" onclick="sendAction('B_BUTTON')">B</button>
-        <button class="start-button" onclick="sendAction('START_BUTTON')">Start</button>
-    </div>
+       thumbstick.addEventListener('touchstart', (e) => {
+           for (let touch of e.changedTouches) {
+               if (activeTouchId === null) {
+                   start(touch.clientX, touch.clientY, touch.identifier);
+               }
+           }
+       });
+   
 
-    <script>
+       thumbstick.addEventListener('touchmove', (e) => {
+           for (let touch of e.changedTouches) {
+               if (touch.identifier === activeTouchId) {
+                   move(touch.clientX, touch.clientY);
+               }
+           }
+       });
+
+       thumbstick.addEventListener('touchend', (e) => {
+           for (let touch of e.changedTouches) {
+               end(touch.identifier);
+           }
+       });
+
+       thumbstick.addEventListener('mousedown', (e) => {
+           start(e.clientX, e.clientY, 'mouse');
+       });
+
+       document.addEventListener('mousemove', (e) => {
+           if (activeTouchId === 'mouse') {
+               move(e.clientX, e.clientY);
+           }
+       });
+
+       document.addEventListener('mouseup', () => {
+           end('mouse');
+       });
+   };
+
+   createThumbstick('left-thumbstick', 'left-thumbstick-inner');
+   createThumbstick('right-thumbstick', 'right-thumbstick-inner');
 
 
-        const DIRECTIONS = {
-            CENTER: "-CENTER",
-            UP: "DUP",
-            UP_RIGHT: "DUP-DRIGHT",
-            RIGHT: "DRIGHT",
-            DOWN_RIGHT: "DDOWN-DRIGHT",
-            DOWN: "DDOWN",
-            DOWN_LEFT: "DDOWN-DLEFT",
-            LEFT: "DLEFT",
-            UP_LEFT: "DUP-DLEFT"
-        };
+let socket = new WebSocket("ws://192.168.1.8:1089");
 
-        const createThumbstick = (thumbstickId, thumbstickInnerId) => {
-            const thumbstick = document.getElementById(thumbstickId);
-            const thumbstickInner = document.getElementById(thumbstickInnerId);
-            let activeTouchId = null;
-            let startX, startY;
-            let currentDirection = DIRECTIONS.CENTER;
+socket.onopen = function () {
+console.log("Connection established");
+};
 
-            function getDirection(x, y) {
-                const distance = Math.sqrt(x * x + y * y);
-                const threshold = 0.5; // Adjust this value to change sensitivity
+socket.onclose = function () {
+console.log("Connection closed");
+};
 
-                if (distance < threshold) {
-                    return DIRECTIONS.CENTER;
-                }
+function sendAction(action) {
+if (navigator.vibrate) {
+   navigator.vibrate(200);
+}
 
-                // Calculate angle in degrees (0-360)
-                let angle = Math.atan2(y, x) * 180 / Math.PI;
-                if (angle < 0) angle += 360;
+if (socket.readyState === WebSocket.OPEN) {
+   socket.send(JSON.stringify({ action: action, client: "CLIENT_ID" }));
+}
+}
+   
+   document.addEventListener('dblclick', function(e) {
+       e.preventDefault();
+   });
+   
+   document.addEventListener("selectionchange", () => {
+       if (window.getSelection) {
+           window.getSelection().removeAllRanges();
+       }
+   });
 
-                // Convert angle to 8-way direction
-                if (angle >= 337.5 || angle < 22.5) return DIRECTIONS.RIGHT;
-                if (angle >= 22.5 && angle < 67.5) return DIRECTIONS.DOWN_RIGHT;
-                if (angle >= 67.5 && angle < 112.5) return DIRECTIONS.DOWN;
-                if (angle >= 112.5 && angle < 157.5) return DIRECTIONS.DOWN_LEFT;
-                if (angle >= 157.5 && angle < 202.5) return DIRECTIONS.LEFT;
-                if (angle >= 202.5 && angle < 247.5) return DIRECTIONS.UP_LEFT;
-                if (angle >= 247.5 && angle < 292.5) return DIRECTIONS.UP;
-                return DIRECTIONS.UP_RIGHT;
-            }
+   document.addEventListener("contextmenu", (event) => {
+       event.preventDefault();
+   });
+</script>
 
-            const start = (x, y, id) => {
-                activeTouchId = id;
-                startX = x;
-                startY = y;
-            };
-
-            const move = (x, y) => {
-                if (activeTouchId === null) return;
-                const deltaX = x - startX;
-                const deltaY = y - startY;
-
-                const maxDistance = window.innerWidth * 0.05;
-                const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
-                const normalizedDistance = Math.min(distance, maxDistance);
-
-                const angle = Math.atan2(deltaY, deltaX);
-                const moveX = normalizedDistance * Math.cos(angle);
-                const moveY = normalizedDistance * Math.sin(angle);
-
-                // Calculate normalized values for direction detection
-                const normalizedX = deltaX / maxDistance;
-                const normalizedY = deltaY / maxDistance; // Removed the negative sign here
-
-                const newDirection = getDirection(normalizedX, normalizedY);
-                if (newDirection !== currentDirection) {
-                    currentDirection = newDirection;
-                    sendAction(`${thumbstickId}_${newDirection}`);
-                }
-
-                thumbstickInner.style.transform = `translate(calc(-50% + ${moveX}px), calc(-50% + ${moveY}px))`;
-            };
-
-            const end = (id) => {
-                if (activeTouchId !== id) return;
-                activeTouchId = null;
-                currentDirection = DIRECTIONS.CENTER;
-                thumbstickInner.style.transform = 'translate(-50%, -50%)';
-                sendAction(`${thumbstickId}_${DIRECTIONS.CENTER}`);
-            };
-
-            thumbstick.addEventListener('touchstart', (e) => {
-                for (let touch of e.changedTouches) {
-                    if (activeTouchId === null) {
-                        start(touch.clientX, touch.clientY, touch.identifier);
-                    }
-                }
-            });
-
-            thumbstick.addEventListener('touchmove', (e) => {
-                for (let touch of e.changedTouches) {
-                    if (touch.identifier === activeTouchId) {
-                        move(touch.clientX, touch.clientY);
-                    }
-                }
-            });
-
-            thumbstick.addEventListener('touchend', (e) => {
-                for (let touch of e.changedTouches) {
-                    end(touch.identifier);
-                }
-            });
-
-            thumbstick.addEventListener('mousedown', (e) => {
-                start(e.clientX, e.clientY, 'mouse');
-            });
-
-            document.addEventListener('mousemove', (e) => {
-                if (activeTouchId === 'mouse') {
-                    move(e.clientX, e.clientY);
-                }
-            });
-
-            document.addEventListener('mouseup', () => {
-                end('mouse');
-            });
-        };
-
-        createThumbstick('left-thumbstick', 'left-thumbstick-inner');
-        createThumbstick('right-thumbstick', 'right-thumbstick-inner');
-
-        function isIOS() {
-            return /iPhone|iPad|iPod/i.test(navigator.userAgent);
-        }
-
-        function playBeep() {
-            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-            const oscillator = audioContext.createOscillator();
-            const gainNode = audioContext.createGain();
-
-            // Configure the oscillator
-            oscillator.type = "sine"; // Sine wave
-            var frequency = 440 + (Math.random() * 20 - 10); // ±10 Hz from 440 Hz
-            oscillator.connect(gainNode);
-
-            // Configure the gain (volume)
-            gainNode.gain.setValueAtTime(0.5, audioContext.currentTime); // Volume
-            gainNode.connect(audioContext.destination);
-
-            // Play for 200 ms
-            oscillator.start();
-            oscillator.stop(audioContext.currentTime + 0.2);
-        }
-
-        function sendAction(action) {
-            if (!isIOS() && navigator.vibrate) {
-
-                // Vibrate for 200ms if the device supports it
-                navigator.vibrate(200);
-            }
-            var xhr = new XMLHttpRequest();
-            xhr.open("POST", "/", true);
-            xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-            xhr.send("ACTION=" + action + "&CLIENT=CLIENT_ID");
-
-        }
-
-        document.addEventListener('dblclick', function (e) {
-            e.preventDefault();
-        });
-
-        document.addEventListener("selectionchange", () => {
-            if (window.getSelection) {
-                window.getSelection().removeAllRanges();
-            }
-        });
-
-        document.addEventListener("contextmenu", (event) => {
-            event.preventDefault();
-        });
-    </script>
-
-</body>
-
-</html>
+</body></html>
